@@ -346,10 +346,18 @@ export const exportPdf = async (req, res) => {
             if (err) {
                 console.error('Error sending PDF file:', err);
             }
-            // Cleanup after sending
-            if (fs.existsSync(pdfPath)) {
-                fs.unlinkSync(pdfPath);
-            }
+            // Cleanup after sending: Windows locks files briefly after express stream finishes
+            setTimeout(() => {
+                try {
+                    if (fs.existsSync(pdfPath)) {
+                        fs.unlinkSync(pdfPath);
+                        console.log(`Cleaned up temporary PDF: ${pdfPath}`);
+                    }
+                }
+                catch (e) {
+                    console.error(`Could not cleanup PDF ${pdfPath}:`, e.message);
+                }
+            }, 10000);
         });
     }
     catch (error) {

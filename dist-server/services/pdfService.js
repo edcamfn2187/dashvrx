@@ -1,7 +1,13 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
-import { jsPDF } from 'jspdf';
+const getAppBaseUrl = () => {
+    if (process.env.APP_BASE_URL) {
+        return process.env.APP_BASE_URL;
+    }
+    const port = Number(process.env.PORT) || 3000;
+    return `http://localhost:${port}`;
+};
 export async function generatePdfFromUrl(url) {
     let browser;
     try {
@@ -50,38 +56,28 @@ export async function generatePdfFromPages(client, pages) {
         if (!fs.existsSync(downloadsPath)) {
             fs.mkdirSync(downloadsPath, { recursive: true });
         }
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: [297, 167.1],
+        await page.evaluateOnNewDocument(({ selectedClient, selectedPages }) => {
+            localStorage.setItem('selected_client', selectedClient);
+            localStorage.setItem('custom_pages', JSON.stringify(selectedPages));
+        }, {
+            selectedClient: client,
+            selectedPages: pages
         });
-        const tempImgDir = path.join(process.cwd(), 'img', 'temp_pdf');
-        if (!fs.existsSync(tempImgDir)) {
-            fs.mkdirSync(tempImgDir, { recursive: true });
-        }
-        for (let i = 0; i < pages.length; i++) {
-            const customPage = pages[i];
-            // Note: Using localhost:3000 or 3001 depending on where the app is served. 
-            // Assuming 3001 for the dev server as per previous logs.
-            const url = `http://localhost:3001/?client=${encodeURIComponent(client)}&page=${customPage.id}&isPdfMode=true`;
-            await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
-            await page.waitForSelector('#root', { timeout: 30000 }).catch(() => new Promise(res => setTimeout(res, 2000)));
-            // Give a bit more time for charts/widgets to stabilize if needed
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            const imgPath = path.join(tempImgDir, `page_${i}.png`);
-            await page.screenshot({ path: imgPath });
-            const imgData = fs.readFileSync(imgPath).toString('base64');
-            if (i > 0) {
-                pdf.addPage([297, 167.1], 'landscape');
-            }
-            pdf.addImage(`data:image/png;base64,${imgData}`, 'PNG', 0, 0, 297, 167.1);
-            // Clean up temp image
-            fs.unlinkSync(imgPath);
-        }
+        const baseUrl = getAppBaseUrl();
+        const url = `${baseUrl}/?client=${encodeURIComponent(client)}&exportAll=true&isPdfMode=true`;
+        await page.goto(url, { waitUntil: 'networkidle0', timeout: 90000 });
+        await page.waitForSelector('#root', { timeout: 30000 });
+        await page.waitForSelector('.pdf-page-wrapper', { timeout: 30000 }).catch(() => null);
+        // Give more time for charts/widgets to stabilize if needed since it's a long page
+        await new Promise(resolve => setTimeout(resolve, 5000));
         const timestamp = new Date().getTime();
         const pdfPath = path.join(downloadsPath, `Relatorio_vRx_${client}_${timestamp}.pdf`);
-        const buffer = Buffer.from(pdf.output('arraybuffer'));
-        fs.writeFileSync(pdfPath, buffer);
+        await page.pdf({
+            path: pdfPath,
+            format: 'A4',
+            landscape: true,
+            printBackground: true,
+        });
         return pdfPath;
     }
     catch (error) {
