@@ -1,0 +1,45 @@
+{
+  "name": "vicarius-vrx-executive-dashboard",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "tsc --project tsconfig.server.json",
+    "preview": "node dist-server/server.js",
+    "start": "node dist-server/server.js"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.0",
+    "lucide-react": "^0.563.0",
+    "mssql": "^12.2.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.1",
+    "plotly.js": "^3.4.0",
+    "puppeteer": "^24.37.5",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-plotly.js": "^2.6.0",
+    "recharts": "^3.7.0",
+    "tsx": "^4.21.0",
+    "vite": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/mssql": "^9.1.9",
+    "@types/node": "^22.14.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^7.0.11",
+    "@types/react-plotly.js": "^2.6.4",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2"
+  }
+}

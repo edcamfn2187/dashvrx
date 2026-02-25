@@ -1,0 +1,97 @@
+[
+  {
+    "id": "home",
+    "name": "Início",
+    "icon": "Home",
+    "queryIds": [],
+    "fileName": "inicio"
+  },
+  {
+    "id": "custom-1771984151015",
+    "name": "Visão Geral",
+    "icon": "LayoutDashboard",
+    "queryIds": [],
+    "columns": 12,
+    "rowHeight": 220,
+    "layout": [
+      {
+        "id": "row-1772023046684",
+        "columnCount": 4,
+        "height": 60,
+        "cells": [
+          {
+            "id": "cell-1772023046684-0",
+            "queryIds": [
+              "q-1771946063571"
+            ],
+            "gridSpan": 3
+          },
+          {
+            "id": "cell-1772023046684-1",
+            "queryIds": [
+              "q-vulns"
+            ],
+            "gridSpan": 3
+          },
+          {
+            "id": "cell-1772023046684-2",
+            "queryIds": [
+              "q-apps"
+            ],
+            "gridSpan": 3
+          },
+          {
+            "id": "cell-1772023048640-3",
+            "queryIds": [
+              "q-1770944564773"
+            ],
+            "gridSpan": 3
+          }
+        ]
+      },
+      {
+        "id": "row-1772023146108",
+        "columnCount": 2,
+        "height": 280,
+        "cells": [
+          {
+            "id": "cell-1772023146108-0",
+            "queryIds": [
+              "q-1770924026797"
+            ],
+            "gridSpan": 4
+          },
+          {
+            "id": "cell-1772023146108-1",
+            "queryIds": [
+              "q-1770922735256"
+            ],
+            "gridSpan": 8
+          }
+        ]
+      },
+      {
+        "id": "row-1772023209510",
+        "columnCount": 2,
+        "height": 280,
+        "cells": [
+          {
+            "id": "cell-1772023209511-0",
+            "queryIds": [
+              "q-connectivity"
+            ],
+            "gridSpan": 4
+          },
+          {
+            "id": "cell-1772023209511-1",
+            "queryIds": [
+              "q-1770922994250"
+            ],
+            "gridSpan": 8
+          }
+        ]
+      }
+    ],
+    "fileName": "visao-geral"
+  }
+]

@@ -1,0 +1,25 @@
+version: '3'
+services:
+  dashboard:
+    build: .
+    container_name: dashvrx-app
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - SQL_SERVER=${SQL_SERVER}
+      - SQL_PORT=${SQL_PORT}
+      - SQL_USER=${SQL_USER}
+      - SQL_PASSWORD=${SQL_PASSWORD}
+      - SQL_DATABASE=${SQL_DATABASE}
+      - SQL_CONFIG_DATABASE=${SQL_CONFIG_DATABASE}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - cybersecup_default
+    restart: always
+
+networks:
+  cybersecup_default:
+    external: true
