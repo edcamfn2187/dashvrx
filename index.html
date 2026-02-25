@@ -7,8 +7,7 @@
   <title>Vicarius vRx Report</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Biblioteca para download direto de PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -39,34 +38,7 @@
       background: #334155;
     }
 
-    /* Estilos para a área de exportação - CRÍTICO: Não usar display:none */
-    .pdf-export-container {
-      position: absolute;
-      left: -5000px;
-      /* Joga para longe da tela mas mantém renderizado */
-      top: 0;
-      width: 1920px;
-      background-color: #0a0f1e !important;
-      z-index: -1000;
-      visibility: visible;
-    }
 
-    .pdf-page-break {
-      page-break-after: always !important;
-      break-after: page !important;
-      width: 1920px;
-      height: 1080px;
-      box-sizing: border-box;
-      overflow: hidden;
-      position: relative;
-      background-color: #0a0f1e !important;
-    }
-
-    /* Garante que o html2canvas capture as cores corretamente */
-    .pdf-export-container * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
 
     @media print {
       .no-print {
