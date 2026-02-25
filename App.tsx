@@ -1,18 +1,29 @@
+import React, { useEffect, useState } from 'react';
+import { Shield } from 'lucide-react';
 
-import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
-import { Page } from './types';
+import DynamicPage from './pages/DynamicPage';
+import CompliancePage from './pages/CompliancePage';
+import DadosCvesPage from './pages/DadosCvesPage';
 import Home from './pages/Home';
 import Settings from './pages/Settings';
-import DynamicPage from './pages/DynamicPage';
-import { fetchDashboardData, initializeDefaultPages } from './services/dataService';
-import { Database, Shield } from 'lucide-react';
-
-// Specialized Pages
-import VisaoGeralPage from './pages/VisaoGeralPage';
-import DadosCvesPage from './pages/DadosCvesPage';
 import UpdatesAppOsPage from './pages/UpdatesAppOsPage';
-import CompliancePage from './pages/CompliancePage';
+import VisaoGeralPage from './pages/VisaoGeralPage';
+import { fetchDashboardData, initializeDefaultPages } from './services/dataService';
+import { Page } from './types';
+
+type SpecializedPageComponent = React.ComponentType<{ pageId?: string; isPdfMode?: boolean }>;
+
+const SPECIAL_PAGE_REGISTRY: Array<{ component: SpecializedPageComponent; aliases: string[] }> = [
+  { component: VisaoGeralPage, aliases: ['overview', 'visao-geral', 'custom-1771604176722'] },
+  { component: DadosCvesPage, aliases: ['cve_analysis', 'dados-cves', 'custom-1771604533538'] },
+  { component: UpdatesAppOsPage, aliases: ['updates', 'updates-app-os', 'custom-1771008387205'] },
+  { component: CompliancePage, aliases: ['compliance', 'custom-1771605045950'] }
+];
+
+const specialPagesById = new Map(
+  SPECIAL_PAGE_REGISTRY.flatMap(({ component, aliases }) => aliases.map(alias => [alias, component]))
+);
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState<string>(Page.HOME);
@@ -24,8 +35,6 @@ const App: React.FC = () => {
     await initializeDefaultPages();
     const result = await fetchDashboardData();
 
-    // Garantia crítica: Se o resultado da API não trouxer o cliente, 
-    // injetamos o que está no localStorage para não ficar vazio na Home.
     const finalData = {
       ...result,
       client: result.client || localStorage.getItem('selected_client') || 'GUIDONI'
@@ -69,25 +78,17 @@ const App: React.FC = () => {
     );
   }
 
-  const isExportAll = new URLSearchParams(window.location.search).get('exportAll') === 'true';
-  const isPdfMode = new URLSearchParams(window.location.search).get('isPdfMode') === 'true';
+  const queryParams = new URLSearchParams(window.location.search);
+  const isExportAll = queryParams.get('exportAll') === 'true';
+  const isPdfMode = queryParams.get('isPdfMode') === 'true';
 
   const renderContent = (pageToRender: string) => {
     if (pageToRender === Page.HOME) return <Home key={`${Page.HOME}-${data?.client}`} data={data} isPdfMode={isPdfMode} />;
     if (pageToRender === Page.SETTINGS) return <Settings key={Page.SETTINGS} />;
 
-    // Mapeamento de Páginas Especializadas
-    if (pageToRender === 'overview' || pageToRender === 'visao-geral' || pageToRender === 'custom-1771604176722') {
-      return <VisaoGeralPage key={`${pageToRender}-${data?.client}`} pageId={pageToRender} isPdfMode={isPdfMode} />;
-    }
-    if (pageToRender === 'cve_analysis' || pageToRender === 'dados-cves' || pageToRender === 'custom-1771604533538') {
-      return <DadosCvesPage key={`${pageToRender}-${data?.client}`} pageId={pageToRender} isPdfMode={isPdfMode} />;
-    }
-    if (pageToRender === 'updates' || pageToRender === 'updates-app-os' || pageToRender === 'custom-1771008387205') {
-      return <UpdatesAppOsPage key={`${pageToRender}-${data?.client}`} pageId={pageToRender} isPdfMode={isPdfMode} />;
-    }
-    if (pageToRender === 'compliance' || pageToRender === 'custom-1771605045950') {
-      return <CompliancePage key={`${pageToRender}-${data?.client}`} pageId={pageToRender} isPdfMode={isPdfMode} />;
+    const SpecializedPage = specialPagesById.get(pageToRender);
+    if (SpecializedPage) {
+      return <SpecializedPage key={`${pageToRender}-${data?.client}`} pageId={pageToRender} isPdfMode={isPdfMode} />;
     }
 
     return <DynamicPage key={`${pageToRender}-${data?.client}`} pageId={pageToRender} isPdfMode={isPdfMode} />;
@@ -96,16 +97,21 @@ const App: React.FC = () => {
   if (isExportAll && data) {
     const pages = JSON.parse(localStorage.getItem('custom_pages') || '[]');
     const pagesToRender = pages.length > 0 ? pages : [{ id: Page.HOME }];
+
     return (
       <div className="bg-[#0a0f1e] text-white min-h-screen">
         {pagesToRender.map((p: any) => (
-          <div key={p.id} className="pdf-page-wrapper" style={{
-            pageBreakAfter: 'always',
-            width: '297mm',
-            height: '209mm',
-            overflow: 'hidden',
-            position: 'relative'
-          }}>
+          <div
+            key={p.id}
+            className="pdf-page-wrapper"
+            style={{
+              pageBreakAfter: 'always',
+              width: '297mm',
+              height: '209mm',
+              overflow: 'hidden',
+              position: 'relative'
+            }}
+          >
             {renderContent(p.id)}
           </div>
         ))}
