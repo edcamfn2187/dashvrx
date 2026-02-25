@@ -81,6 +81,7 @@ const App: React.FC = () => {
   const queryParams = new URLSearchParams(window.location.search);
   const isExportAll = queryParams.get('exportAll') === 'true';
   const isPdfMode = queryParams.get('isPdfMode') === 'true';
+  const exportPagesParam = queryParams.get('exportPages');
 
   const renderContent = (pageToRender: string) => {
     if (pageToRender === Page.HOME) return <Home key={`${Page.HOME}-${data?.client}`} data={data} isPdfMode={isPdfMode} />;
@@ -95,7 +96,20 @@ const App: React.FC = () => {
   };
 
   if (isExportAll && data) {
-    const pages = JSON.parse(localStorage.getItem('custom_pages') || '[]');
+    let pages: any[] = [];
+
+    if (exportPagesParam) {
+      try {
+        pages = JSON.parse(exportPagesParam);
+      } catch {
+        pages = [];
+      }
+    }
+
+    if (!pages.length) {
+      pages = JSON.parse(localStorage.getItem('custom_pages') || '[]');
+    }
+
     const pagesToRender = pages.length > 0 ? pages : [{ id: Page.HOME }];
 
     return (

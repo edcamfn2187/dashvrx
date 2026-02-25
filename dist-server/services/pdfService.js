@@ -1,6 +1,13 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
+const getAppBaseUrl = () => {
+    if (process.env.APP_BASE_URL) {
+        return process.env.APP_BASE_URL;
+    }
+    const port = Number(process.env.PORT) || 3000;
+    return `http://localhost:${port}`;
+};
 export async function generatePdfFromUrl(url) {
     let browser;
     try {
@@ -49,9 +56,18 @@ export async function generatePdfFromPages(client, pages) {
         if (!fs.existsSync(downloadsPath)) {
             fs.mkdirSync(downloadsPath, { recursive: true });
         }
-        const url = `http://localhost:3001/?client=${encodeURIComponent(client)}&exportAll=true&isPdfMode=true`;
+        await page.evaluateOnNewDocument(({ selectedClient, selectedPages }) => {
+            localStorage.setItem('selected_client', selectedClient);
+            localStorage.setItem('custom_pages', JSON.stringify(selectedPages));
+        }, {
+            selectedClient: client,
+            selectedPages: pages
+        });
+        const baseUrl = getAppBaseUrl();
+        const url = `${baseUrl}/?client=${encodeURIComponent(client)}&exportAll=true&isPdfMode=true`;
         await page.goto(url, { waitUntil: 'networkidle0', timeout: 90000 });
-        await page.waitForSelector('#root', { timeout: 30000 }).catch(() => new Promise(res => setTimeout(res, 2000)));
+        await page.waitForSelector('#root', { timeout: 30000 });
+        await page.waitForSelector('.pdf-page-wrapper', { timeout: 30000 }).catch(() => null);
         // Give more time for charts/widgets to stabilize if needed since it's a long page
         await new Promise(resolve => setTimeout(resolve, 5000));
         const timestamp = new Date().getTime();
