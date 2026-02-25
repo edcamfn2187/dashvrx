@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
-import { jsPDF } from 'jspdf';
+
 import { CustomPage } from '../types.js';
 
 export async function generatePdfFromUrl(url: string): Promise<string> {
